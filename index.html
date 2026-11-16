@@ -14,45 +14,75 @@ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:en
 body{margin:0;background:var(--bg);color:var(--text);font:15px/1.4 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
 header{background:var(--accent);color:#fff;padding:22px 28px}
 header h1{margin:0;font-size:26px}header p{margin:6px 0 0;font-weight:700;font-size:14px}
-main{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:24px;padding:28px;max-width:1200px;margin:0 auto}
+main{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:24px;padding:28px;max-width:1200px;margin:0 auto;align-items:start}
 @media(max-width:820px){main{grid-template-columns:1fr;padding:16px}header{padding:18px 16px}}
 .card{background:var(--card);border-radius:8px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-label,.lbl{display:block;font-weight:600;margin-bottom:8px}
+.prev{position:sticky;top:12px;display:flex;flex-direction:column}
+@media(max-width:820px){.prev{position:static;order:-1}}
+h3{margin:22px 0 12px;padding-top:16px;border-top:1px solid var(--line);font-size:14px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent)}
+h3:first-of-type{margin-top:0;padding-top:0;border:0}
+label,.lbl{display:block;font-weight:600;margin-bottom:6px;font-size:14px}
 .lbl.big{font-size:16px}
-input[type=text],select{width:100%;height:40px;padding:6px 10px;font:inherit;color:var(--text);background:var(--field);border:1px solid var(--line);border-radius:4px;margin-bottom:18px}
+input[type=text],select{width:100%;height:38px;padding:6px 10px;font:inherit;color:var(--text);background:var(--field);border:1px solid var(--line);border-radius:4px}
 input[type=text]:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;margin-bottom:18px}
+input[type=color]{width:100%;height:38px;padding:2px;background:var(--field);border:1px solid var(--line);border-radius:4px;cursor:pointer}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;margin-bottom:6px}
 .grid span{display:block;font-size:12px;color:var(--muted)}
 .grid b{font-weight:600;color:var(--text)}
-input[type=range]{width:100%;accent-color:var(--accent)}
+.chk{display:flex;gap:8px;align-items:center;font-weight:500;margin:0;height:38px;align-self:end}
+.chk input{accent-color:var(--accent);width:18px;height:18px}
+.full{grid-column:1/-1}
+input[type=file]{font-size:13px;width:100%;color:var(--muted)}
 button{font:inherit;font-weight:600;color:#fff;border:0;border-radius:4px;height:42px;padding:0 20px;cursor:pointer}
 button:disabled{opacity:.45;cursor:not-allowed}
-#gen{background:var(--accent);min-width:170px}#gen:hover{background:var(--accent-d)}
+#gen{background:var(--accent);margin-top:20px;min-width:170px}#gen:hover{background:var(--accent-d)}
 #png{background:#2E7D32}#svg{background:#6A1B9A}
-#status{margin:18px 0 0;color:var(--muted)}
-.prev{display:flex;flex-direction:column}
+#status{margin:14px 0 0;color:var(--muted)}
 .prev h2{margin:0;font-size:16px;text-align:center}
-#box{flex:1;min-height:280px;margin:14px 0;border:1px solid var(--line);background:var(--prev);display:flex;align-items:center;justify-content:center;padding:12px;color:var(--muted);text-align:center}
-#box svg{width:100%;max-width:420px;height:auto;aspect-ratio:1/1;display:block;background:#fff}
+#box{min-height:280px;margin:14px 0;border:1px solid var(--line);background:var(--prev);display:flex;align-items:center;justify-content:center;padding:12px;color:var(--muted);text-align:center;
+background-image:linear-gradient(45deg,rgba(128,128,128,.12) 25%,transparent 25%,transparent 75%,rgba(128,128,128,.12) 75%),linear-gradient(45deg,rgba(128,128,128,.12) 25%,transparent 25%,transparent 75%,rgba(128,128,128,.12) 75%);background-size:20px 20px;background-position:0 0,10px 10px}
+#box svg{width:100%;max-width:420px;height:auto;aspect-ratio:1/1;display:block}
 .btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btns select{width:auto}
 </style>
 </head>
 <body>
-<header><h1>Gerador de QR Code</h1><p>Insira um link para criar seu código</p></header>
+<header><h1>Gerador de QR Code</h1><p>Insira um link e personalize seu código</p></header>
 <main>
 <section class="card">
+  <h3>Conteúdo</h3>
   <label class="lbl big" for="url">URL ou link</label>
-  <input type="text" id="url" placeholder="https://www.exemplo.com" inputmode="url" autocomplete="off" title="Exemplo: https://www.exemplo.com">
-  <label for="logo">Logo central</label>
-  <select id="logo">
-    <option value="">Nenhum</option><option value="whatsapp">WhatsApp</option><option value="instagram">Instagram</option><option value="maps">Maps</option><option value="google">Google</option>
-  </select>
-  <div class="lbl">Ajustes da logo (pixels)</div>
+  <input type="text" id="url" placeholder="https://www.exemplo.com" inputmode="url" autocomplete="off">
+
+  <h3>Cores e estilo</h3>
   <div class="grid">
-    <div><span>Offset X: <b id="vx">0</b></span><input type="range" id="ox" min="-20" max="20" value="0" step="1"></div>
-    <div><span>Offset Y: <b id="vy">0</b></span><input type="range" id="oy" min="-20" max="20" value="0" step="1"></div>
-    <div><span>Tamanho: <b id="vs">120</b></span><input type="range" id="sz" min="25" max="250" value="120" step="1"></div>
-    <div><span>Círculo: <b id="vc">180</b></span><input type="range" id="ci" min="25" max="250" value="180" step="1"></div>
+    <div><label for="fg">Cor do QR</label><input type="color" id="fg" value="#000000"></div>
+    <div><label for="bg">Cor do fundo</label><input type="color" id="bg" value="#ffffff"></div>
+    <label class="chk"><input type="checkbox" id="tr"> Fundo transparente</label>
+    <div><label for="mod">Formato dos módulos</label><select id="mod"><option value="sq">Quadrado</option><option value="rd">Arredondado</option><option value="dot">Pontos</option></select></div>
+    <div><label for="ecc">Correção de erro</label><select id="ecc"><option value="L">L (7%)</option><option value="M">M (15%)</option><option value="Q" selected>Q (25%)</option><option value="H">H (30%)</option></select></div>
+    <div><span>Margem (módulos): <b data-v="qz">4</b></span><input type="range" id="qz" min="0" max="8" value="4"></div>
+  </div>
+
+  <h3>Moldura</h3>
+  <div class="grid">
+    <div><label for="frame">Tipo de borda</label><select id="frame"><option value="none">Sem borda</option><option value="sq">Quadrada</option><option value="round">Cantos arredondados</option></select></div>
+    <div><label for="fc">Cor da borda</label><input type="color" id="fc" value="#000000"></div>
+    <div class="full"><span>Espessura: <b data-v="fw">12</b></span><input type="range" id="fw" min="2" max="40" value="12"></div>
+  </div>
+
+  <h3>Logo central</h3>
+  <div class="grid">
+    <div><label for="logo">Logo</label><select id="logo"><option value="">Nenhum</option><option value="whatsapp">WhatsApp</option><option value="instagram">Instagram</option><option value="maps">Maps</option><option value="google">Google</option></select></div>
+    <div><label for="lc">Cor da logo</label><input type="color" id="lc" value="#000000"></div>
+    <div class="full"><label for="file">Importar logo (PNG, JPG, SVG ou WebP)</label><input type="file" id="file" accept="image/*"></div>
+    <div><label for="lbg">Fundo da logo</label><select id="lbg"><option value="circle">Círculo</option><option value="round">Quadrado arredondado</option><option value="square">Quadrado</option><option value="none">Sem fundo</option></select></div>
+    <div></div>
+    <div><span>Offset X: <b data-v="ox">0</b></span><input type="range" id="ox" min="-20" max="20" value="0"></div>
+    <div><span>Offset Y: <b data-v="oy">0</b></span><input type="range" id="oy" min="-20" max="20" value="0"></div>
+    <div><span>Tamanho: <b data-v="sz">120</b></span><input type="range" id="sz" min="25" max="250" value="120"></div>
+    <div><span>Fundo da logo: <b data-v="ci">180</b></span><input type="range" id="ci" min="25" max="250" value="180"></div>
   </div>
   <button id="gen">Gerar QR Code</button>
   <p id="status" role="status">Digite um link e clique em Gerar QR Code.</p>
@@ -60,49 +90,83 @@ button:disabled{opacity:.45;cursor:not-allowed}
 <section class="card prev">
   <h2>Pré-visualização</h2>
   <div id="box">O QR Code aparecerá aqui</div>
-  <div class="btns"><button id="png" disabled>Salvar como PNG</button><button id="svg" disabled>Salvar como SVG</button></div>
+  <div class="btns">
+    <select id="res" aria-label="Tamanho do PNG"><option value="512">PNG 512 px</option><option value="1024" selected>PNG 1024 px</option><option value="2048">PNG 2048 px</option></select>
+    <button id="png" disabled>Salvar como PNG</button><button id="svg" disabled>Salvar como SVG</button>
+  </div>
 </section>
 </main>
 <script>
 const NS="http://www.w3.org/2000/svg",$=id=>document.getElementById(id);
 const LOGOS={whatsapp:"M12885.34 15828.6c-123.06,-66.9 -727.5,-390.6 -840.93,-436.33 -113.3,-45.64 -196,-69.44 -284.37,51.93 -88.23,121.07 -339.03,392.27 -415.03,472.53 -76.37,80.3 -149.77,87.77 -272.9,20.74 -122.81,-66.67 -521.71,-213.1 -984.34,-654.37 -360,-343.44 -596.1,-759.84 -664.6,-886.9 -68.54,-127.27 -0.5,-192.07 64.6,-251.61 58.43,-53.73 130.83,-140.76 196.26,-210.9 65.17,-70.23 88.24,-121.23 133.1,-202.7 44.84,-81.46 26.8,-154.83 -2.26,-218.2 -29.04,-63.2 -256.54,-684.57 -351.57,-937.3 -95,-252.77 -200.87,-215.13 -274.03,-218 -73.07,-2.5 -156.24,-16.17 -239.84,-19.17 -83.53,-3.17 -220.53,22.97 -340,143.04 -119.53,120.1 -454.63,408.86 -477.7,1020.87 -23.07,611.6 403.53,1219.57 463.03,1304.7 59.57,85.37 814.71,1411.57 2069.61,1956.97 1255.24,545.2 1261.8,378.97 1492.07,366.74 230.47,-12 752.74,-273.4 868.24,-559.64 115.4,-286.37 124.67,-535.3 95.33,-588.3 -29.43,-52.97 -111.63,-87.4 -234.67,-154.1zm-2301.77 2948.24c-829.94,0 -1602.91,-247 -2248.31,-670.4l-1570.47 498.84 510.47 -1505.84c-489.2,-668.7 -778.24,-1490.07 -778.24,-2377.64 0,-2236.18 1833.31,-4055.35 4086.55,-4055.35 2253.61,0 4086.81,1819.17 4086.81,4055.35 0,2235.97 -1833.2,4055.04 -4086.81,4055.04zm0 -8926.29c-2711.08,0 -4908.95,2180.8 -4908.95,4871.25 0,920.3 257.37,1781.04 704.37,2515.34l-886.07 2613.41 2717.94 -863.41c703.37,385.81 1512.14,605.91 2372.71,605.91 2711.48,0 4909.25,-2181.11 4909.25,-4871.25 0,-2690.45 -2197.77,-4871.25 -4909.25,-4871.25z",instagram:"M8570.47 10675.83c-620.93,0 -1184.07,252.67 -1591.87,660.5 -407.83,407.83 -660.5,970.97 -660.5,1591.87l0 3844.83c0,620.9 252.67,1184.03 660.5,1591.87 407.84,407.83 970.97,660.5 1591.87,660.5l3844.8 0c620.9,0 1184.07,-252.67 1591.9,-660.5 407.83,-407.84 660.5,-970.97 660.5,-1591.87l0 -3844.83c0,-620.9 -252.67,-1184.04 -660.5,-1591.87 -407.83,-407.83 -970.97,-660.5 -1591.9,-660.5l-3844.8 0zm1922.37 2467.87c-470.54,0 -897.34,191.46 -1206.34,500.53 -309.03,309.03 -500.5,735.83 -500.5,1206.4 0,470.53 191.47,897.3 500.5,1206.33 309.04,309.04 735.8,500.5 1206.34,500.5 470.53,0 897.36,-191.46 1206.4,-500.53 309.1,-309 500.56,-735.77 500.56,-1206.3 0,-470.57 -191.46,-897.37 -500.53,-1206.4 -309.07,-309.07 -735.9,-500.53 -1206.43,-500.53zm3476.16 -1074.74c0,191.67 -77.8,365.3 -203.4,490.97 -125.7,125.83 -299.33,203.57 -491.1,203.57 -191.63,0 -365.3,-77.8 -491,-203.5 -125.7,-125.54 -203.46,-299.24 -203.46,-491.04 0,-191.76 77.76,-365.4 203.36,-491.03 125.64,-125.6 299.34,-203.37 491.1,-203.37 191.67,0 365.27,77.77 490.94,203.37 125.73,125.73 203.56,299.4 203.56,491.03zm-3476.16 5331.57c-703.04,0 -1340.54,-286 -1802.2,-747.7 -461.7,-461.67 -747.7,-1099.2 -747.7,-1802.2 0,-703.03 286,-1340.63 747.7,-1802.3 461.63,-461.7 1099.16,-747.73 1802.2,-747.73 703.03,0 1340.6,286.03 1802.3,747.73 461.7,461.7 747.7,1099.27 747.7,1802.3 0,703 -286,1340.53 -747.74,1802.2 -461.66,461.67 -1099.23,747.7 -1802.26,747.7zm1922.43 2450l-3844.8 0c-848.53,0 -1618.03,-345.17 -2175.27,-902.33 -557.23,-557.24 -902.4,-1326.67 -902.4,-2175.17l0 -3844.83c0,-848.54 345.17,-1618.04 902.4,-2175.27 557.24,-557.2 1326.74,-902.4 2175.27,-902.4l3844.8 0c848.53,0 1618.03,345.2 2175.27,902.4 557.2,557.27 902.4,1326.73 902.4,2175.27l0 3844.83c0,848.5 -345.2,1617.93 -902.4,2175.13 -557.27,557.2 -1326.74,902.37 -2175.27,902.37z",maps:"M10492.87 9850.53c-2170.73,0 -3930.53,1759.77 -3930.53,3930.57 0,969.13 352.3,1854.8 933.76,2540.1l2996.77 3529.33 2996.63 -3529.43c581.5,-685.2 933.84,-1571 933.84,-2540.14 0.09,-2170.66 -1759.67,-3930.43 -3930.47,-3930.43zm0 5445.97c-892.73,0 -1616.43,-723.7 -1616.43,-1616.44 0,-892.73 723.7,-1616.43 1616.43,-1616.43 892.73,0 1616.43,723.7 1616.43,1616.43 0,892.74 -723.7,1616.44 -1616.43,1616.44zm-3031.9 -1594.5c0,-1674.5 1357.43,-3031.94 3031.9,-3031.94 1674.5,0 3031.93,1357.44 3031.83,3031.84 0,1665.06 -1968.9,3496.66 -3031.83,4748.56 -1062.97,-1251.86 -3031.9,-3083.4 -3031.9,-4748.46z",google:"M15969.3 13456.97c0,-411.11 -33.36,-711.11 -105.55,-1022.22l-4694.45 0 0 1855.54 2755.54 0c-55.54,461.13 -355.54,1155.57 -1022.22,1622.21 -422.22,294.45 -988.9,500 -1733.32,500 -1322.22,0 -2444.43,-872.19 -2844.47,-2077.74l0 -0.01c-105.55,-311.11 -166.64,-644.46 -166.64,-988.89 0,-344.47 61.09,-677.78 161.09,-988.89l0 -0.01c405.6,-1205.55 1527.81,-2077.78 2850.03,-2077.78l-0.01 0c938.88,0 1572.2,405.55 1933.32,744.46l1411.11 -1377.79c-866.64,-805.54 -1994.44,-1299.99 -3344.43,-1299.99 -1955.57,0 -3644.47,1122.21 -4466.68,2755.53 -338.87,677.79 -533.32,1438.91 -533.32,2244.47 0,805.56 194.44,1566.65 533.31,2244.43 822.22,1633.32 2511.12,2755.57 4466.69,2755.57 1349.98,0 2483.31,-444.46 3311.11,-1211.11 944.43,-872.23 1488.89,-2155.57 1488.89,-3677.78z"};
 qrcode.stringToBytes=qrcode.stringToBytesFuncs["UTF-8"];
-const cache={};let current=null;
+const cache={};let current=null,custom=null;
 function bbox(k){if(!cache[k]){const s=document.createElementNS(NS,"svg");s.setAttribute("style","position:absolute;width:0;height:0;visibility:hidden");
  const p=document.createElementNS(NS,"path");p.setAttribute("d",LOGOS[k]);s.appendChild(p);document.body.appendChild(s);cache[k]=p.getBBox();s.remove();}return cache[k];}
 function validUrl(t){try{const u=new URL(t);return u.protocol==="http:"||u.protocol==="https:"}catch{return false}}
+const lum=h=>(.299*parseInt(h.slice(1,3),16)+.587*parseInt(h.slice(3,5),16)+.114*parseInt(h.slice(5,7),16));
+function modPath(x,y,st){
+ if(st==="dot")return `M${x+.05} ${y+.5}a.45 .45 0 1 0 .9 0a.45 .45 0 1 0 -.9 0z`;
+ return `M${x+.3} ${y}h.4a.3 .3 0 0 1 .3 .3v.4a.3 .3 0 0 1 -.3 .3h-.4a.3 .3 0 0 1 -.3 -.3v-.4a.3 .3 0 0 1 .3 -.3z`;
+}
 function buildSvg(text){
- const qr=qrcode(0,"Q");qr.addData(text);qr.make();
- const n=qr.getModuleCount(),M=20,Q=4,size=(n+2*Q)*M;let d="";
- for(let r=0;r<n;r++){let c=0;while(c<n){if(qr.isDark(r,c)){let s=c;while(c<n&&qr.isDark(r,c))c++;d+=`M${s+Q} ${r+Q}h${c-s}v1h-${c-s}z`}else c++}}
- let out=`<svg xmlns="${NS}" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}"><rect width="${size}" height="${size}" fill="#fff"/><path transform="scale(${M})" d="${d}" fill="#000" shape-rendering="crispEdges"/>`;
+ const qr=qrcode(0,$("ecc").value);qr.addData(text);qr.make();
+ const n=qr.getModuleCount(),M=20,Q=+$("qz").value,fr=$("frame").value,fw=fr==="none"?0:+$("fw").value;
+ const size=(n+2*Q)*M+2*fw,c=size/2,fg=$("fg").value,bg=$("tr").checked?null:$("bg").value,st=$("mod").value;
+ const rad=fr==="round"?Math.round(size*.08):0;
+ let o=`<svg xmlns="${NS}" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">`;
+ if(bg)o+=`<rect width="${size}" height="${size}" rx="${rad}" fill="${bg}"/>`;
+ if(fw)o+=`<rect x="${fw/2}" y="${fw/2}" width="${size-fw}" height="${size-fw}" rx="${Math.max(rad-fw/2,0)}" fill="none" stroke="${$("fc").value}" stroke-width="${fw}"/>`;
+ let d="";
+ for(let r=0;r<n;r++){let col=0;while(col<n){if(qr.isDark(r,col)){
+   if(st==="sq"){let s=col;while(col<n&&qr.isDark(r,col))col++;d+=`M${s} ${r}h${col-s}v1h-${col-s}z`}
+   else{d+=modPath(col,r,st);col++}
+  }else col++}}
+ o+=`<path transform="translate(${fw+Q*M} ${fw+Q*M}) scale(${M})" d="${d}" fill="${fg}"${st==="sq"?' shape-rendering="crispEdges"':""}/>`;
  const k=$("logo").value;
  if(k){
-  const ox=+$("ox").value,oy=+$("oy").value,ls=+$("sz").value,cs=+$("ci").value,b=bbox(k),c=size/2;
-  const draw=Math.min(ls,cs*.8),s=Math.min(draw/b.width,draw/b.height);
-  const tx=c+ox-(b.x+b.width/2)*s,ty=c+oy-(b.y+b.height/2)*s;
-  out+=`<circle cx="${c}" cy="${c}" r="${cs/2}" fill="#fff" stroke="#fff" stroke-width="2"/><path transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${s.toFixed(5)})" d="${LOGOS[k]}" fill="#000" fill-rule="evenodd"/>`;
+  const ox=+$("ox").value,oy=+$("oy").value,ls=+$("sz").value,cs=+$("ci").value,cover=bg||"#ffffff",sh=$("lbg").value;
+  if(sh==="circle")o+=`<circle cx="${c}" cy="${c}" r="${cs/2}" fill="${cover}" stroke="${cover}" stroke-width="2"/>`;
+  else if(sh!=="none")o+=`<rect x="${c-cs/2}" y="${c-cs/2}" width="${cs}" height="${cs}" rx="${sh==="round"?cs*.2:0}" fill="${cover}" stroke="${cover}" stroke-width="2"/>`;
+  const draw=sh==="circle"?Math.min(ls,cs*.8):Math.min(ls,cs*(sh==="none"?1:.9));
+  if(k==="custom"&&custom){
+   const s=draw/Math.max(custom.w,custom.h),w=custom.w*s,h=custom.h*s;
+   o+=`<image href="${custom.url}" x="${(c+ox-w/2).toFixed(2)}" y="${(c+oy-h/2).toFixed(2)}" width="${w.toFixed(2)}" height="${h.toFixed(2)}" preserveAspectRatio="xMidYMid meet"/>`;
+  }else if(LOGOS[k]){
+   const b=bbox(k),s=Math.min(draw/b.width,draw/b.height);
+   const tx=c+ox-(b.x+b.width/2)*s,ty=c+oy-(b.y+b.height/2)*s;
+   o+=`<path transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${s.toFixed(5)})" d="${LOGOS[k]}" fill="${$("lc").value}" fill-rule="evenodd"/>`;
+  }
  }
- return {svg:out+"</svg>",size};
+ return {svg:o+"</svg>",size};
 }
 function generate(silent){
- const t=$("url").value.trim(),st=$("status");
- if(!t){if(!silent){st.textContent="Digite uma URL ou link para gerar o QR Code.";$("url").focus()}return}
- if(!validUrl(t)){if(!silent){st.textContent="Informe um link válido começando com http:// ou https://.";$("url").focus()}return}
- try{current=buildSvg(t)}catch(e){st.textContent="Link muito longo para um QR Code.";return}
- $("box").innerHTML=current.svg;$("png").disabled=$("svg").disabled=false;st.textContent="QR Code gerado com sucesso.";
+ const t=$("url").value.trim(),s=$("status");
+ if(!t){if(!silent){s.textContent="Digite uma URL ou link para gerar o QR Code.";$("url").focus()}return}
+ if(!validUrl(t)){if(!silent){s.textContent="Informe um link válido começando com http:// ou https://.";$("url").focus()}return}
+ try{current=buildSvg(t)}catch(e){s.textContent="Link muito longo para este nível de correção de erro.";return}
+ $("box").innerHTML=current.svg;$("png").disabled=$("svg").disabled=false;
+ s.textContent=(!$("tr").checked&&lum($("fg").value)>lum($("bg").value))?"Gerado, mas o QR está mais claro que o fundo: alguns leitores podem não conseguir ler.":"QR Code gerado com sucesso.";
 }
 let timer;const later=()=>{clearTimeout(timer);timer=setTimeout(()=>generate(true),200)};
-[["ox","vx"],["oy","vy"],["sz","vs"],["ci","vc"]].forEach(([i,v])=>$(i).addEventListener("input",()=>{$(v).textContent=$(i).value;later()}));
-$("url").addEventListener("input",later);
+document.querySelectorAll("input,select").forEach(el=>{if(el.id==="file"||el.id==="res")return;
+ el.addEventListener("input",()=>{const v=document.querySelector(`[data-v="${el.id}"]`);if(v)v.textContent=el.value;later()});
+ el.addEventListener("change",later)});
 $("url").addEventListener("keydown",e=>{if(e.key==="Enter"){generate(false);e.preventDefault()}});
-$("logo").addEventListener("change",()=>generate(true));
 $("gen").addEventListener("click",()=>generate(false));
+$("file").addEventListener("change",e=>{
+ const f=e.target.files[0];if(!f)return;
+ if(!f.type.startsWith("image/")||f.size>3e6){$("status").textContent="Escolha uma imagem de até 3 MB.";return}
+ const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{
+   custom={url:r.result,w:im.naturalWidth||150,h:im.naturalHeight||150};
+   let op=$("logo").querySelector('[value="custom"]');if(!op){op=new Option("Personalizada","custom");$("logo").add(op)}
+   $("logo").value="custom";generate(true);$("status").textContent="Logo importada: "+f.name};
+  im.onerror=()=>{$("status").textContent="Não foi possível ler essa imagem."};im.src=r.result};r.readAsDataURL(f)});
 function save(blob,name){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
 $("svg").addEventListener("click",()=>{if(!current)return;save(new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n'+current.svg],{type:"image/svg+xml"}),"qrcode.svg");$("status").textContent="SVG salvo."});
 $("png").addEventListener("click",()=>{if(!current)return;
- const img=new Image(),u=URL.createObjectURL(new Blob([current.svg],{type:"image/svg+xml"}));
- img.onload=()=>{const c=document.createElement("canvas");c.width=c.height=current.size;c.getContext("2d").drawImage(img,0,0,current.size,current.size);URL.revokeObjectURL(u);
+ const img=new Image(),u=URL.createObjectURL(new Blob([current.svg],{type:"image/svg+xml"})),px=+$("res").value;
+ img.onload=()=>{const c=document.createElement("canvas");c.width=c.height=px;c.getContext("2d").drawImage(img,0,0,px,px);URL.revokeObjectURL(u);
   c.toBlob(b=>{save(b,"qrcode.png");$("status").textContent="PNG salvo."},"image/png")};
  img.onerror=()=>{$("status").textContent="Não foi possível criar o PNG."};img.src=u});
 </script>
