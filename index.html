@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Gerador de QR Code</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
 <style>
 :root{--bg:#F4F6F8;--card:#fff;--text:#263238;--muted:#607D8B;--line:#CFD8DC;--prev:#FAFAFA;--accent:#FF9800;--accent-d:#E68900;--field:#fff;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -45,6 +46,14 @@ background-image:linear-gradient(45deg,rgba(128,128,128,.12) 25%,transparent 25%
 #box svg{width:100%;max-width:420px;height:auto;aspect-ratio:1/1;display:block}
 .btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .btns select{width:auto}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tab{flex:1;height:38px;background:var(--field);color:var(--text);border:1px solid var(--line)}
+.tab[aria-pressed=true]{background:var(--accent);color:#fff;border-color:var(--accent)}
+textarea{width:100%;padding:8px 10px;font:inherit;color:var(--text);background:var(--field);border:1px solid var(--line);border-radius:4px;resize:vertical}
+.pane[hidden]{display:none}
+#cp{background:#455A64}
+#test{margin-top:14px;font-size:13px}#test ul{list-style:none;padding:0;margin:6px 0}
+#test .ok{color:#43A047}#test .bad{color:#E53935}#test .na{color:var(--muted)}#test .note{color:var(--muted);font-size:12px}
 </style>
 </head>
 <body>
@@ -52,8 +61,27 @@ background-image:linear-gradient(45deg,rgba(128,128,128,.12) 25%,transparent 25%
 <main>
 <section class="card">
   <h3>Conteúdo</h3>
-  <label class="lbl big" for="url">URL ou link</label>
-  <input type="text" id="url" placeholder="https://www.exemplo.com" inputmode="url" autocomplete="off">
+  <div class="tabs"><button class="tab" data-t="link" aria-pressed="true">Link</button><button class="tab" data-t="wa" aria-pressed="false">WhatsApp</button><button class="tab" data-t="pix" aria-pressed="false">Pix</button></div>
+  <div class="pane" id="p-link">
+    <label class="lbl big" for="url">URL ou link</label>
+    <input type="text" id="url" placeholder="https://www.exemplo.com" inputmode="url" autocomplete="off">
+  </div>
+  <div class="pane" id="p-wa" hidden>
+    <label for="wn">Número com DDD</label>
+    <input type="text" id="wn" placeholder="(85) 99999-9999" inputmode="tel" autocomplete="off" style="margin-bottom:12px">
+    <label for="wm">Mensagem (opcional)</label>
+    <textarea id="wm" rows="3" placeholder="Olá! Gostaria de mais informações."></textarea>
+  </div>
+  <div class="pane" id="p-pix" hidden>
+    <div class="grid">
+      <div><label for="kt">Tipo de chave</label><select id="kt"><option value="cpf">CPF</option><option value="cnpj">CNPJ</option><option value="tel">Telefone</option><option value="email">E-mail</option><option value="rand">Chave aleatória</option></select></div><div><label for="pk">Chave Pix</label><input type="text" id="pk" placeholder="000.000.000-00" autocomplete="off"></div>
+      <div><label for="pn">Nome do recebedor</label><input type="text" id="pn" maxlength="25" autocomplete="off"></div>
+      <div><label for="pc">Cidade</label><input type="text" id="pc" maxlength="15" autocomplete="off"></div>
+      <div><label for="pv">Valor (opcional)</label><input type="text" id="pv" inputmode="decimal" placeholder="0,00" autocomplete="off"></div>
+      <div><label for="pt">Identificador (opcional)</label><input type="text" id="pt" maxlength="25" autocomplete="off"></div>
+      <div class="full"><label for="pd">Mensagem (opcional)</label><input type="text" id="pd" maxlength="40" autocomplete="off"></div>
+    </div>
+  </div>
 
   <h3>Cores e estilo</h3>
   <div class="grid">
@@ -92,8 +120,9 @@ background-image:linear-gradient(45deg,rgba(128,128,128,.12) 25%,transparent 25%
   <div id="box">O QR Code aparecerá aqui</div>
   <div class="btns">
     <select id="res" aria-label="Tamanho do PNG"><option value="512">PNG 512 px</option><option value="1024" selected>PNG 1024 px</option><option value="2048">PNG 2048 px</option></select>
-    <button id="png" disabled>Salvar como PNG</button><button id="svg" disabled>Salvar como SVG</button>
+    <button id="png" disabled>Salvar como PNG</button><button id="svg" disabled>Salvar como SVG</button><button id="cp" disabled>Copiar texto do QR</button>
   </div>
+  <div id="test"></div>
 </section>
 </main>
 <script>
@@ -118,10 +147,12 @@ function buildSvg(text){
  if(bg)o+=`<rect width="${size}" height="${size}" rx="${rad}" fill="${bg}"/>`;
  if(fw)o+=`<rect x="${fw/2}" y="${fw/2}" width="${size-fw}" height="${size-fw}" rx="${Math.max(rad-fw/2,0)}" fill="none" stroke="${$("fc").value}" stroke-width="${fw}"/>`;
  let d="";
- for(let r=0;r<n;r++){let col=0;while(col<n){if(qr.isDark(r,col)){
+ const inF=(r,c)=>(r<7&&(c<7||c>=n-7))||(r>=n-7&&c<7);
+ for(let r=0;r<n;r++){let col=0;while(col<n){if(qr.isDark(r,col)&&(st==="sq"||!inF(r,col))){
    if(st==="sq"){let s=col;while(col<n&&qr.isDark(r,col))col++;d+=`M${s} ${r}h${col-s}v1h-${col-s}z`}
    else{d+=modPath(col,r,st);col++}
   }else col++}}
+ if(st!=="sq")for(const [fx,fy] of [[0,0],[n-7,0],[0,n-7]])d+=`M${fx} ${fy}h7v7h-7zM${fx+1} ${fy+1}v5h5v-5zM${fx+2} ${fy+2}h3v3h-3z`;
  o+=`<path transform="translate(${fw+Q*M} ${fw+Q*M}) scale(${M})" d="${d}" fill="${fg}"${st==="sq"?' shape-rendering="crispEdges"':""}/>`;
  const k=$("logo").value;
  if(k){
@@ -141,15 +172,15 @@ function buildSvg(text){
  return {svg:o+"</svg>",size};
 }
 function generate(silent){
- const t=$("url").value.trim(),s=$("status");
- if(!t){if(!silent){s.textContent="Digite uma URL ou link para gerar o QR Code.";$("url").focus()}return}
- if(!validUrl(t)){if(!silent){s.textContent="Informe um link válido começando com http:// ou https://.";$("url").focus()}return}
- try{current=buildSvg(t)}catch(e){s.textContent="Link muito longo para este nível de correção de erro.";return}
- $("box").innerHTML=current.svg;$("png").disabled=$("svg").disabled=false;
+ const r=getContent(),s=$("status");
+ if(r.err){clearPreview();s.textContent=r.err;if(!silent&&r.f)$(r.f).focus();return}
+ const t=r.text;
+ try{current=buildSvg(t)}catch(e){clearPreview();s.textContent="Conteúdo grande demais para este nível de correção de erro.";return}
+ current.text=t;$("box").innerHTML=current.svg;$("png").disabled=$("svg").disabled=$("cp").disabled=false;runTest(t);
  s.textContent=(!$("tr").checked&&lum($("fg").value)>lum($("bg").value))?"Gerado, mas o QR está mais claro que o fundo: alguns leitores podem não conseguir ler.":"QR Code gerado com sucesso.";
 }
 let timer;const later=()=>{clearTimeout(timer);timer=setTimeout(()=>generate(true),200)};
-document.querySelectorAll("input,select").forEach(el=>{if(el.id==="file"||el.id==="res")return;
+document.querySelectorAll("input,select,textarea").forEach(el=>{if(el.id==="file"||el.id==="res")return;
  el.addEventListener("input",()=>{const v=document.querySelector(`[data-v="${el.id}"]`);if(v)v.textContent=el.value;later()});
  el.addEventListener("change",later)});
 $("url").addEventListener("keydown",e=>{if(e.key==="Enter"){generate(false);e.preventDefault()}});
@@ -162,6 +193,68 @@ $("file").addEventListener("change",e=>{
    let op=$("logo").querySelector('[value="custom"]');if(!op){op=new Option("Personalizada","custom");$("logo").add(op)}
    $("logo").value="custom";generate(true);$("status").textContent="Logo importada: "+f.name};
   im.onerror=()=>{$("status").textContent="Não foi possível ler essa imagem."};im.src=r.result};r.readAsDataURL(f)});
+let tab="link",testId=0;
+const tlv=(i,v)=>i+String(v.length).padStart(2,"0")+v;
+const clean=(s,m)=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Za-z0-9 ]/g,"").toUpperCase().trim().slice(0,m);
+function crc16(s){let c=0xFFFF;for(let i=0;i<s.length;i++){c^=s.charCodeAt(i)<<8;for(let j=0;j<8;j++)c=c&0x8000?((c<<1)^0x1021):(c<<1);c&=0xFFFF}return c.toString(16).toUpperCase().padStart(4,"0")}
+function pix(){
+ const kr=pixKey();if(kr.err)return kr;const k=kr.k;
+ const nm=clean($("pn").value,25),ct=clean($("pc").value,15);
+ if(!nm)return{err:"Informe o nome do recebedor.",f:"pn"};
+ if(!ct)return{err:"Informe a cidade.",f:"pc"};
+ let v=$("pv").value.trim().replace(",",".");
+ if(v){const x=parseFloat(v);if(!(x>0)||x>=1e10)return{err:"Valor inválido.",f:"pv"};v=x.toFixed(2)}
+ const tx=$("pt").value.replace(/[^A-Za-z0-9]/g,"").slice(0,25)||"***",ds=clean($("pd").value,40);
+ if(k.length+ds.length>73)return{err:"Chave e mensagem somam caracteres demais.",f:"pd"};
+ const p=tlv("00","01")+tlv("01","11")+tlv("26",tlv("00","br.gov.bcb.pix")+tlv("01",k)+(ds?tlv("02",ds):""))+tlv("52","0000")+tlv("53","986")+(v?tlv("54",v):"")+tlv("58","BR")+tlv("59",nm)+tlv("60",ct)+tlv("62",tlv("05",tx))+"6304";
+ return{text:p+crc16(p)};
+}
+function getContent(){
+ if(tab==="link"){const t=$("url").value.trim();if(!t)return{err:"Digite uma URL ou link para gerar o QR Code.",f:"url"};if(!validUrl(t))return{err:"Informe um link válido começando com http:// ou https://.",f:"url"};return{text:t}}
+ if(tab==="wa"){let n=$("wn").value.replace(/\D/g,"").replace(/^00/,"");
+  if(!n)return{err:"Digite o número do WhatsApp com DDD.",f:"wn"};
+  if(n.length<=11)n="55"+n;
+  if(n.length<12||n.length>15)return{err:"Número inválido. Use DDD + número (ex.: 85 99999-9999).",f:"wn"};
+  const m=$("wm").value.trim();return{text:"https://wa.me/"+n+(m?"?text="+encodeURIComponent(m):"")}}
+ return pix();
+}
+const MASK={cpf:["000.000.000-00",11],cnpj:["00.000.000/0000-00",14],tel:["(00) 00000-0000",11]};
+const PH={cpf:"000.000.000-00",cnpj:"00.000.000/0000-00",tel:"(85) 99999-9999",email:"nome@exemplo.com",rand:"123e4567-e89b-12d3-a456-426614174000"};
+function mask(v,t){const m=MASK[t];if(!m)return v;const d=v.replace(/\D/g,"").slice(0,m[1]);let o="",i=0;for(const ch of m[0]){if(i>=d.length)break;if(ch==="0")o+=d[i++];else o+=ch}return o}
+function cpfOk(d){if(/^(\d)\1+$/.test(d))return false;for(let n=9;n<11;n++){let s=0;for(let i=0;i<n;i++)s+=d[i]*(n+1-i);if((s*10%11%10)!==+d[n])return false}return true}
+function pixKey(){const t=$("kt").value,v=$("pk").value.trim(),d=v.replace(/\D/g,"");
+ if(!v)return{err:"Informe a chave Pix.",f:"pk"};
+ if(t==="cpf"){if(d.length!==11||!cpfOk(d))return{err:"CPF inválido.",f:"pk"};return{k:d}}
+ if(t==="cnpj"){if(d.length!==14)return{err:"CNPJ inválido.",f:"pk"};return{k:d}}
+ if(t==="tel"){if(d.length<10||d.length>11)return{err:"Telefone inválido. Use (DDD) 99999-9999.",f:"pk"};return{k:"+55"+d}}
+ if(t==="email"){if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v))return{err:"E-mail inválido.",f:"pk"};return{k:v.toLowerCase()}}
+ if(!/^[0-9a-fA-F-]{36}$/.test(v))return{err:"Chave aleatória inválida (36 caracteres).",f:"pk"};return{k:v.toLowerCase()}}
+$("pk").addEventListener("input",()=>{$("pk").value=mask($("pk").value,$("kt").value)});
+$("kt").addEventListener("change",()=>{$("pk").value=mask($("pk").value,$("kt").value);$("pk").placeholder=PH[$("kt").value]});
+function clearPreview(){current=null;testId++;$("box").textContent="O QR Code aparecerá aqui";$("png").disabled=$("svg").disabled=$("cp").disabled=true;$("test").innerHTML=""}
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{tab=b.dataset.t;document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-pressed",x===b));document.querySelectorAll(".pane").forEach(p=>p.hidden=p.id!=="p-"+tab);generate(true)}));
+["wn","pk","pn","pc","pv","pt","pd"].forEach(i=>$(i).addEventListener("keydown",e=>{if(e.key==="Enter"){generate(false);e.preventDefault()}}));
+$("cp").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(current.text);$("status").textContent="Texto copiado."}catch{$("status").textContent="Não foi possível copiar."}});
+async function runTest(text){
+ const id=++testId,box=$("test"),head="<b>Sempre teste seu QR code.</b>";
+ if(typeof jsQR==="undefined"){box.innerHTML=head+'<div class="na">Leitor indisponível.</div>';return}
+ box.innerHTML=head+"<div>Testando…</div>";
+ const img=new Image();
+ try{await new Promise((ok,no)=>{img.onload=ok;img.onerror=no;img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(current.svg)})}catch{return}
+ const T=[["Tamanho normal (400 px)",400],["Pequeno (160 px)",160],["Muito pequeno (110 px)",110],["Câmera desfocada",220,"blur(1.5px)"],["Pouca luz e contraste baixo",300,"contrast(.45) brightness(.85)"]];
+ let rows="",pass=0,tot=0;
+ for(const [name,px,f] of T){
+  await new Promise(r=>setTimeout(r));if(id!==testId)return;
+  const pad=Math.round(px*.08),c=document.createElement("canvas");c.width=c.height=px+pad*2;
+  const x=c.getContext("2d",{willReadFrequently:true});x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);
+  if(f){if(!("filter" in x)){rows+=`<li class="na">– ${name}: não suportado neste navegador</li>`;continue}x.filter=f}
+  x.drawImage(img,pad,pad,px,px);
+  let ok=false;try{const d=x.getImageData(0,0,c.width,c.height),r=jsQR(d.data,d.width,d.height);ok=!!r&&r.data===text}catch{}
+  tot++;if(ok)pass++;rows+=`<li class="${ok?"ok":"bad"}">${ok?"✔":"✖"} ${name}</li>`;
+ }
+ if(id!==testId)return;
+ box.innerHTML=head+`<ul>${rows}</ul><div class="${pass===tot?"ok":"bad"}">${pass} de ${tot} cenários lidos</div><div class="note">Simulação no navegador, mais rigorosa que a maioria dos celulares. Antes de imprimir, confirme com a câmera de 2 ou 3 aparelhos.</div>`;
+}
 function save(blob,name){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
 $("svg").addEventListener("click",()=>{if(!current)return;save(new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n'+current.svg],{type:"image/svg+xml"}),"qrcode.svg");$("status").textContent="SVG salvo."});
 $("png").addEventListener("click",()=>{if(!current)return;
